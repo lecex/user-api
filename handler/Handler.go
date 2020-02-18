@@ -1,8 +1,9 @@
 package handler
 
 import (
-	server "github.com/micro/go-micro/v2/server"
 	"os"
+
+	server "github.com/micro/go-micro/v2/server"
 
 	authPB "github.com/lecex/user-api/proto/auth"
 	casbinPB "github.com/lecex/user-api/proto/casbin"
@@ -26,7 +27,6 @@ func Register(s server.Server) {
 	frontPermitPB.RegisterFrontPermitsHandler(s, &FrontPermit{UserService})
 	permissionPB.RegisterPermissionsHandler(s, &Permission{UserService})
 	rolePB.RegisterRolesHandler(s, &Role{UserService})
-	// 权限管理服务实现
-	casbinPB.RegisterCasbinHandler(s, &Casbin{UserService})
+	casbinPB.RegisterCasbinHandler(s, &Casbin{UserService}) // 权限管理服务实现
 	healthPB.RegisterHealthHandler(s, &Health{})
 }

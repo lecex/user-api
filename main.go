@@ -8,11 +8,16 @@ import (
 
 	// 执行数据迁移
 	"github.com/lecex/user-api/handler"
+	// m "github.com/lecex/user/middleware"
 )
 
 func main() {
 	config.LoadFile("config.yaml")
-
+	// 设置权限
+	// h := m.Handler{
+	// 	Permissions: Conf.Permissions,
+	// 	UserService: UserService,
+	// }
 	service := micro.NewService(
 		micro.Name(config.Get("service", "name").String("user-api")),
 		micro.Version(config.Get("service", "bersion").String("latest")),

@@ -15,6 +15,8 @@
     go get -u github.com/gogo/protobuf/protoc-gen-gogofaster
     go get -u github.com/gogo/protobuf/gogoproto
 ```
+## 调用模块
+- [user](https://github.com/lecex/user)
 ## user 用户服务
 - Exist     查询用户
 - List      用户列表

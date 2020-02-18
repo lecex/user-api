@@ -7,7 +7,7 @@ import (
 
 	"github.com/micro/go-micro/v2/metadata"
 
-	"github.com/lecex/user-api/hander"
+	"github.com/lecex/user-api/handler"
 	userPB "github.com/lecex/user-api/proto/user"
 )
 
@@ -18,7 +18,7 @@ func TestPermissions(t *testing.T) {
 }
 
 func TestMobileBuild(t *testing.T) {
-	h := hander.User{}
+	h := handler.User{}
 	req := &userPB.Request{
 		Verify: "632541",
 		Uuid:   "asfdasfasfasafsafs",
@@ -30,7 +30,7 @@ func TestMobileBuild(t *testing.T) {
 }
 
 func TestUserGet(t *testing.T) {
-	h := hander.User{}
+	h := handler.User{}
 	req := &userPB.Request{
 		User: &userPB.User{
 			Username: `bvbv0111`,
@@ -47,7 +47,7 @@ func TestUserGet(t *testing.T) {
 }
 
 func TestUserInfo(t *testing.T) {
-	h := hander.User{}
+	h := handler.User{}
 	req := &userPB.Request{}
 	res := &userPB.Response{}
 	meta := map[string]string{

@@ -8,7 +8,6 @@ import (
 
 	// 执行数据迁移
 	"github.com/lecex/user-api/handler"
-	// m "github.com/lecex/user/middleware"
 )
 
 func main() {
@@ -20,7 +19,7 @@ func main() {
 	// }
 	service := micro.NewService(
 		micro.Name(config.Get("service", "name").String("user-api")),
-		micro.Version(config.Get("service", "bersion").String("latest")),
+		micro.Version(config.Get("service", "version").String("latest")),
 	)
 	service.Init()
 

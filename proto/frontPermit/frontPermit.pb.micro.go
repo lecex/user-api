@@ -48,7 +48,7 @@ type FrontPermitsService interface {
 	// 删除权限
 	Delete(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
 	// 同步前端权限 允许外部权限  需要最高 root 权限  *********高危 调用慎重*********
-	UpdateOrCreate(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
+	Sync(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
 }
 
 type frontPermitsService struct {
@@ -123,8 +123,8 @@ func (c *frontPermitsService) Delete(ctx context.Context, in *Request, opts ...c
 	return out, nil
 }
 
-func (c *frontPermitsService) UpdateOrCreate(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error) {
-	req := c.c.NewRequest(c.name, "FrontPermits.UpdateOrCreate", in)
+func (c *frontPermitsService) Sync(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error) {
+	req := c.c.NewRequest(c.name, "FrontPermits.Sync", in)
 	out := new(Response)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -150,7 +150,7 @@ type FrontPermitsHandler interface {
 	// 删除权限
 	Delete(context.Context, *Request, *Response) error
 	// 同步前端权限 允许外部权限  需要最高 root 权限  *********高危 调用慎重*********
-	UpdateOrCreate(context.Context, *Request, *Response) error
+	Sync(context.Context, *Request, *Response) error
 }
 
 func RegisterFrontPermitsHandler(s server.Server, hdlr FrontPermitsHandler, opts ...server.HandlerOption) error {
@@ -161,7 +161,7 @@ func RegisterFrontPermitsHandler(s server.Server, hdlr FrontPermitsHandler, opts
 		Create(ctx context.Context, in *Request, out *Response) error
 		Update(ctx context.Context, in *Request, out *Response) error
 		Delete(ctx context.Context, in *Request, out *Response) error
-		UpdateOrCreate(ctx context.Context, in *Request, out *Response) error
+		Sync(ctx context.Context, in *Request, out *Response) error
 	}
 	type FrontPermits struct {
 		frontPermits
@@ -198,6 +198,6 @@ func (h *frontPermitsHandler) Delete(ctx context.Context, in *Request, out *Resp
 	return h.FrontPermitsHandler.Delete(ctx, in, out)
 }
 
-func (h *frontPermitsHandler) UpdateOrCreate(ctx context.Context, in *Request, out *Response) error {
-	return h.FrontPermitsHandler.UpdateOrCreate(ctx, in, out)
+func (h *frontPermitsHandler) Sync(ctx context.Context, in *Request, out *Response) error {
+	return h.FrontPermitsHandler.Sync(ctx, in, out)
 }

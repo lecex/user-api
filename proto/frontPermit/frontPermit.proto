@@ -17,7 +17,7 @@ service FrontPermits {
     // 删除权限
     rpc Delete(Request) returns (Response) {}
     // 同步前端权限 允许外部权限  需要最高 root 权限  *********高危 调用慎重*********
-    rpc UpdateOrCreate(Request) returns (Response) {}
+    rpc Sync(Request) returns (Response) {}
 
 }
 message Permission {

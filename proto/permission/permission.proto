@@ -40,6 +40,7 @@ message ListQuery{
 message Request{
     ListQuery list_query = 1;           // 列表分页请求
     Permission permission = 2;
+    repeated Permission permissions = 3;
 }
 
 message Response{

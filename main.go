@@ -16,19 +16,23 @@ func main() {
 	var Conf = config.Conf
 	UserService := env.Getenv("USER_NAME", "user")
 	// 设置权限
-	h := m.Handler{
+	w := m.Handler{
 		Permissions: Conf.Permissions,
 		UserService: UserService,
 	}
 	service := micro.NewService(
 		micro.Name(Conf.Service),
 		micro.Version(Conf.Version),
-		micro.WrapHandler(h.Wrapper), //验证权限
+		micro.WrapHandler(w.Wrapper), //验证权限
 	)
 	service.Init()
 
 	// 注册服务
-	handler.Register(service.Server(), UserService)
+	h := handler.Handler{
+		ServiceName: UserService,
+		Permissions: Conf.Permissions,
+	}
+	h.Register(service.Server())
 
 	// Run the server
 	if err := service.Run(); err != nil {

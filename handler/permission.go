@@ -13,6 +13,11 @@ type Permission struct {
 	ServiceName string
 }
 
+// Sync 权限列表
+func (srv *Permission) Sync(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
+	return client.Call(ctx, srv.ServiceName, "Permissions.Sync", req, res)
+}
+
 // All 权限列表
 func (srv *Permission) All(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
 	return client.Call(ctx, srv.ServiceName, "Permissions.All", req, res)

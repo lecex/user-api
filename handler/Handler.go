@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
 
 	server "github.com/micro/go-micro/v2/server"
 	"github.com/micro/go-micro/v2/util/log"
@@ -45,7 +44,6 @@ func (srv *Handler) Register() {
 
 // Sync 同步
 func (srv *Handler) Sync() (err error) {
-
 	req := &PB.Request{
 		Permissions: Conf.Permissions,
 	}

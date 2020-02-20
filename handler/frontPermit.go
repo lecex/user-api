@@ -14,8 +14,8 @@ type FrontPermit struct {
 	ServiceName string
 }
 
-// Sync 最高权限同步前端权限列表
-func (srv *FrontPermit) Sync(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
+// UpdateOrCreate 最高权限同步前端权限列表
+func (srv *FrontPermit) UpdateOrCreate(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
 	// 前端权限写入数据库
 	err = client.Call(ctx, srv.ServiceName, "FrontPermits.UpdateOrCreate", req, res)
 	if err != nil {

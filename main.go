@@ -8,10 +8,12 @@ import (
 	"github.com/lecex/core/env"
 	m "github.com/lecex/user/middleware"
 
+	"github.com/lecex/user-api/config"
 	"github.com/lecex/user-api/handler"
 )
 
 func main() {
+	var Conf = config.Conf
 	UserService := env.Getenv("USER_NAME", "user")
 	// 设置权限
 	h := m.Handler{

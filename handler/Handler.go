@@ -3,7 +3,6 @@ package handler
 import (
 	server "github.com/micro/go-micro/v2/server"
 
-	"github.com/lecex/core/env"
 	authPB "github.com/lecex/user-api/proto/auth"
 	casbinPB "github.com/lecex/user-api/proto/casbin"
 	frontPermitPB "github.com/lecex/user-api/proto/frontPermit"
@@ -19,8 +18,7 @@ type Handler struct {
 }
 
 // Register 注册
-func Register(s server.Server) {
-	UserService := env.Getenv("USER_NAME", "user")
+func Register(s server.Server, UserService string) {
 	userPB.RegisterUsersHandler(s, &User{UserService})
 	authPB.RegisterAuthHandler(s, &Auth{UserService})
 	frontPermitPB.RegisterFrontPermitsHandler(s, &FrontPermit{UserService})

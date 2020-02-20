@@ -1,3 +1,0 @@
-service:
-  name: "user-api"
-  version: "latest"

@@ -3,28 +3,30 @@ package main
 import (
 	// 公共引入
 	"github.com/micro/go-micro/v2"
-	"github.com/micro/go-micro/v2/config"
 	"github.com/micro/go-micro/v2/util/log"
 
-	// 执行数据迁移
+	"github.com/lecex/core/env"
+	m "github.com/lecex/user/middleware"
+
 	"github.com/lecex/user-api/handler"
 )
 
 func main() {
-	config.LoadFile("config.yaml")
+	UserService := env.Getenv("USER_NAME", "user")
 	// 设置权限
-	// h := m.Handler{
-	// 	Permissions: Conf.Permissions,
-	// 	UserService: UserService,
-	// }
+	h := m.Handler{
+		Permissions: Conf.Permissions,
+		UserService: UserService,
+	}
 	service := micro.NewService(
-		micro.Name(config.Get("service", "name").String("user-api")),
-		micro.Version(config.Get("service", "version").String("latest")),
+		micro.Name(Conf.Service),
+		micro.Version(Conf.Version),
+		micro.WrapHandler(h.Wrapper), //验证权限
 	)
 	service.Init()
 
 	// 注册服务
-	handler.Register(service.Server())
+	handler.Register(service.Server(), UserService)
 
 	// Run the server
 	if err := service.Run(); err != nil {

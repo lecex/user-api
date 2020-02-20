@@ -49,9 +49,6 @@ func (srv *Handler) Sync() (err error) {
 	req := &PB.Request{
 		Permissions: Conf.Permissions,
 	}
-
-	fmt.Println("req", Conf.Permissions)
-	fmt.Println(req)
 	res := &permissionPB.Response{}
 	return client.Call(context.TODO(), Conf.UserService, "Permissions.Sync", req, res)
 }

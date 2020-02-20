@@ -7,6 +7,6 @@ require (
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.3.3
 	github.com/lecex/core v0.0.0-20200220071759-ccc0d1fffcf0
-	github.com/lecex/user v0.0.0-20200220075719-8bd6ac2c2b4f
+	github.com/lecex/user v0.0.0-20200220090044-d8f6b0403614
 	github.com/micro/go-micro/v2 v2.1.0
 )

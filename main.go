@@ -14,7 +14,7 @@ func main() {
 	service := micro.NewService(
 		micro.Name(Conf.Service),
 		micro.Version(Conf.Version),
-		micro.WrapHandler(Conf.Middleware.Wrapper), //验证权限
+		micro.WrapHandler(Conf.Middleware().Wrapper), //验证权限
 	)
 	service.Init()
 

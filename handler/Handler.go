@@ -2,8 +2,10 @@ package handler
 
 import (
 	"context"
+	"fmt"
 
 	server "github.com/micro/go-micro/v2/server"
+	"github.com/micro/go-micro/v2/util/log"
 
 	client "github.com/lecex/core/client"
 	authPB "github.com/lecex/user-api/proto/auth"
@@ -35,14 +37,21 @@ func (srv *Handler) Register() {
 	casbinPB.RegisterCasbinHandler(srv.Server, &Casbin{Conf.UserService}) // 权限管理服务实现
 	healthPB.RegisterHealthHandler(srv.Server, &Health{})
 
-	srv.Sync() //同步前端数据
+	err := srv.Sync() //同步前端数据
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 // Sync 同步
 func (srv *Handler) Sync() (err error) {
+
 	req := &PB.Request{
 		Permissions: Conf.Permissions,
 	}
+
+	fmt.Println("req", Conf.Permissions)
+	fmt.Println(req)
 	res := &permissionPB.Response{}
 	return client.Call(context.TODO(), Conf.UserService, "Permissions.Sync", req, res)
 }

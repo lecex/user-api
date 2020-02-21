@@ -57,7 +57,7 @@ github.com/json-iterator/go
 github.com/lecex/core/client
 github.com/lecex/core/config
 github.com/lecex/core/env
-# github.com/lecex/user v0.0.0-20200220102149-debd014a11e3
+# github.com/lecex/user v1.0.1
 github.com/lecex/user/middleware
 github.com/lecex/user/proto/auth
 github.com/lecex/user/proto/casbin
@@ -190,7 +190,7 @@ go.uber.org/zap/internal/bufferpool
 go.uber.org/zap/internal/color
 go.uber.org/zap/internal/exit
 go.uber.org/zap/zapcore
-# golang.org/x/crypto v0.0.0-20200219234226-1ad67e1f0ef4
+# golang.org/x/crypto v0.0.0-20200220183623-bac4c82f6975
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/ed25519

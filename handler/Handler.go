@@ -36,9 +36,8 @@ func (srv *Handler) Register() {
 	casbinPB.RegisterCasbinHandler(srv.Server, &Casbin{Conf.UserService}) // 权限管理服务实现
 	healthPB.RegisterHealthHandler(srv.Server, &Health{})
 
-	err := srv.Sync() //同步前端数据
-	if err != nil {
-		log.Fatal(err)
+	if err := srv.Sync(); err != nil {
+		log.Log(err)
 	}
 }
 

@@ -1,26 +1,10 @@
 package config
 
 import (
+	"github.com/lecex/core/config"
 	"github.com/lecex/core/env"
-	m "github.com/lecex/user/middleware"
 	PB "github.com/lecex/user/proto/permission"
 )
-
-// Config 配置
-type Config struct {
-	Service     string
-	Version     string
-	UserService string
-	Permissions []*PB.Permission
-}
-
-// Init
-func (srv *Config) Middleware() *m.Handler {
-	return &m.Handler{
-		UserService: srv.UserService,
-		Permissions: srv.Permissions,
-	}
-}
 
 // 	Conf 配置
 // 	Service // 服务名称
@@ -29,7 +13,7 @@ func (srv *Config) Middleware() *m.Handler {
 //	Policy // 是否认证权限
 //	Name // 权限名称
 //	Description // 权限解释
-var Conf Config = Config{
+var Conf config.Config = config.Config{
 	Service:     "user-api",
 	Version:     "latest",
 	UserService: env.Getenv("USER_NAME", "user"),

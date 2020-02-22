@@ -50,7 +50,7 @@ func (srv *Handler) Wrapper(fn server.HandlerFunc) server.HandlerFunc {
 				meta["Method"] = req.Method()
 				ctx = metadata.NewContext(ctx, meta)
 				if srv.IsPolicy(req) {
-					// 通过 meta user_id 验证权限
+					// 通过 meta Userid 验证权限
 					casbinRes := &authPb.Response{}
 					err := client.Call(ctx, srv.UserService, "Casbin.Validate", &casbinPb.Request{}, casbinRes)
 					if err != nil || casbinRes.Valid == false {

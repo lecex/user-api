@@ -51,7 +51,7 @@ func TestUserInfo(t *testing.T) {
 	req := &userPB.Request{}
 	res := &userPB.Response{}
 	meta := map[string]string{
-		"user_id": "fed9c9a5-c03f-4d8d-be7c-95b9f24c9299",
+		"Userid": "fed9c9a5-c03f-4d8d-be7c-95b9f24c9299",
 	}
 	ctx := metadata.NewContext(context.TODO(), meta)
 	err := h.Info(ctx, req, res)

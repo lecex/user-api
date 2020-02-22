@@ -38,9 +38,9 @@ func (srv *User) MobileBuild(ctx context.Context, req *pb.Request, res *pb.Respo
 		err = errors.New("验证码错误")
 		return err
 	}
-	// meta["user_id"] 通过 meta 获取用户 id --- So this function needs token to use
+	// meta["Userid"] 通过 meta 获取用户 id --- So this function needs token to use
 	meta, _ := metadata.FromContext(ctx)
-	if userID, ok := meta["user_id"]; ok {
+	if userID, ok := meta["Userid"]; ok {
 		// 验证通过 更新用户绑定手机和用户信息 req.User
 		req.User.Id = userID
 		err = client.Call(ctx, srv.ServiceName, "Users.Update", req, res)
@@ -59,9 +59,9 @@ func (srv *User) MobileBuild(ctx context.Context, req *pb.Request, res *pb.Respo
 
 // SelfUpdate 用户通过 token 自己更新数据 只可以更改 用户名、昵称、头像
 func (srv *User) SelfUpdate(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
-	// meta["user_id"] 通过 meta 获取用户 id --- So this function needs token to use
+	// meta["Userid"] 通过 meta 获取用户 id --- So this function needs token to use
 	meta, _ := metadata.FromContext(ctx)
-	if userID, ok := meta["user_id"]; ok {
+	if userID, ok := meta["Userid"]; ok {
 		req.User.Id = userID
 		err = client.Call(ctx, srv.ServiceName, "Users.Update", req, res)
 		if err != nil {
@@ -81,7 +81,7 @@ func (srv *User) Info(ctx context.Context, req *pb.Request, res *pb.Response) (e
 	if !ok {
 		return errors.New("no auth meta-data found in request")
 	}
-	if userID, ok := meta["user_id"]; ok {
+	if userID, ok := meta["Userid"]; ok {
 		// 获取用户信息
 		if req.User == nil {
 			req.User = &pb.User{}

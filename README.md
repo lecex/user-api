@@ -8,7 +8,7 @@
     go get github.com/micro/micro/v2
 
     # protobuf 开发环境
-    go get -u github.com/golang/protobuf/protoc-gen-go
+    go get -u github.com/golang/·/protoc-gen-go
     go get -u github.com/micro/protoc-gen-micro/v2
 
     go get -u github.com/gogo/protobuf/proto
@@ -46,7 +46,7 @@
     - Get               查询权限
     - Create            增加权限
     - Update            更新权限
-    - Delete            删除权限
+    - Delete            删除权限··
 ## Roles 角色管理
     - All               全部角色
     - List              角色列表

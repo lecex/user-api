@@ -36,7 +36,15 @@ type cache struct {
 	ttls    map[string]time.Time
 	watched map[string]bool
 
+	// used to stop the cache
 	exit chan bool
+
+	// indicate whether its running
+	running bool
+	// status of the registry
+	// used to hold onto the cache
+	// in failure state
+	status error
 }
 
 var (
@@ -48,6 +56,18 @@ func backoff(attempts int) time.Duration {
 		return time.Duration(0)
 	}
 	return time.Duration(math.Pow(10, float64(attempts))) * time.Millisecond
+}
+
+func (c *cache) getStatus() error {
+	c.RLock()
+	defer c.RUnlock()
+	return c.status
+}
+
+func (c *cache) setStatus(err error) {
+	c.Lock()
+	c.status = err
+	c.Unlock()
 }
 
 // isValid checks if the service is valid
@@ -63,7 +83,7 @@ func (c *cache) isValid(services []*registry.Service, ttl time.Time) bool {
 	}
 
 	// time since ttl is longer than timeout
-	if time.Since(ttl) > c.opts.TTL {
+	if time.Since(ttl) > 0 {
 		return false
 	}
 
@@ -81,6 +101,11 @@ func (c *cache) quit() bool {
 }
 
 func (c *cache) del(service string) {
+	// don't blow away cache in error state
+	if err := c.status; err != nil {
+		return
+	}
+	// otherwise delete entries
 	delete(c.cache, service)
 	delete(c.ttls, service)
 }
@@ -93,23 +118,36 @@ func (c *cache) get(service string) ([]*registry.Service, error) {
 	services := c.cache[service]
 	// get cache ttl
 	ttl := c.ttls[service]
+	// make a copy
+	cp := registry.Copy(services)
 
 	// got services && within ttl so return cache
-	if c.isValid(services, ttl) {
-		// make a copy
-		cp := registry.Copy(services)
-		// unlock the read
+	if c.isValid(cp, ttl) {
 		c.RUnlock()
-		// return servics
+		// return services
 		return cp, nil
 	}
 
 	// get does the actual request for a service and cache it
-	get := func(service string) ([]*registry.Service, error) {
+	get := func(service string, cached []*registry.Service) ([]*registry.Service, error) {
 		// ask the registry
 		services, err := c.Registry.GetService(service)
 		if err != nil {
+			// check the cache
+			if len(cached) > 0 {
+				// set the error status
+				c.setStatus(err)
+
+				// return the stale cache
+				return cached, nil
+			}
+			// otherwise return error
 			return nil, err
+		}
+
+		// reset the status
+		if err := c.getStatus(); err != nil {
+			c.setStatus(nil)
 		}
 
 		// cache results
@@ -121,15 +159,28 @@ func (c *cache) get(service string) ([]*registry.Service, error) {
 	}
 
 	// watch service if not watched
-	if _, ok := c.watched[service]; !ok {
-		go c.run(service)
-	}
+	_, ok := c.watched[service]
 
 	// unlock the read lock
 	c.RUnlock()
 
+	// check if its being watched
+	if !ok {
+		c.Lock()
+
+		// set to watched
+		c.watched[service] = true
+
+		// only kick it off if not running
+		if !c.running {
+			go c.run()
+		}
+
+		c.Unlock()
+	}
+
 	// get and return services
-	return get(service)
+	return get(service, cp)
 }
 
 func (c *cache) set(service string, services []*registry.Service) {
@@ -144,6 +195,11 @@ func (c *cache) update(res *registry.Result) {
 
 	c.Lock()
 	defer c.Unlock()
+
+	// only save watched services
+	if _, ok := c.watched[res.Service.Name]; !ok {
+		return
+	}
 
 	services, ok := c.cache[res.Service.Name]
 	if !ok {
@@ -247,16 +303,16 @@ func (c *cache) update(res *registry.Result) {
 
 // run starts the cache watcher loop
 // it creates a new watcher if there's a problem
-func (c *cache) run(service string) {
-	// set watcher
+func (c *cache) run() {
 	c.Lock()
-	c.watched[service] = true
+	c.running = true
 	c.Unlock()
 
-	// delete watcher on exit
+	// reset watcher on exit
 	defer func() {
 		c.Lock()
-		delete(c.watched, service)
+		c.watched = make(map[string]bool)
+		c.running = false
 		c.Unlock()
 	}()
 
@@ -273,16 +329,14 @@ func (c *cache) run(service string) {
 		time.Sleep(time.Duration(j) * time.Millisecond)
 
 		// create new watcher
-		w, err := c.Registry.Watch(
-			registry.WatchService(service),
-		)
-
+		w, err := c.Registry.Watch()
 		if err != nil {
 			if c.quit() {
 				return
 			}
 
 			d := backoff(a)
+			c.setStatus(err)
 
 			if a > 3 {
 				log.Log("rcache: ", err, " backing off ", d)
@@ -305,6 +359,7 @@ func (c *cache) run(service string) {
 			}
 
 			d := backoff(b)
+			c.setStatus(err)
 
 			if b > 3 {
 				log.Log("rcache: ", err, " backing off ", d)
@@ -325,20 +380,36 @@ func (c *cache) run(service string) {
 // watch loops the next event and calls update
 // it returns if there's an error
 func (c *cache) watch(w registry.Watcher) error {
-	defer w.Stop()
+	// used to stop the watch
+	stop := make(chan bool)
 
 	// manage this loop
 	go func() {
+		defer w.Stop()
+
+		select {
 		// wait for exit
-		<-c.exit
-		w.Stop()
+		case <-c.exit:
+			return
+		// we've been stopped
+		case <-stop:
+			return
+		}
 	}()
 
 	for {
 		res, err := w.Next()
 		if err != nil {
+			close(stop)
 			return err
 		}
+
+		// reset the error status since we succeeded
+		if err := c.getStatus(); err != nil {
+			// reset status
+			c.setStatus(nil)
+		}
+
 		c.update(res)
 	}
 }
@@ -360,6 +431,9 @@ func (c *cache) GetService(service string) ([]*registry.Service, error) {
 }
 
 func (c *cache) Stop() {
+	c.Lock()
+	defer c.Unlock()
+
 	select {
 	case <-c.exit:
 		return
@@ -369,7 +443,7 @@ func (c *cache) Stop() {
 }
 
 func (c *cache) String() string {
-	return "rcache"
+	return "cache"
 }
 
 // New returns a new cache

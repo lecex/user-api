@@ -30,7 +30,7 @@ func isPrivateIP(ipAddr string) bool {
 // Extract returns a real ip
 func Extract(addr string) (string, error) {
 	// if addr specified then its returned
-	if len(addr) > 0 && (addr != "0.0.0.0" && addr != "[::]") {
+	if len(addr) > 0 && (addr != "0.0.0.0" && addr != "[::]" && addr != "::") {
 		return addr, nil
 	}
 
@@ -39,15 +39,22 @@ func Extract(addr string) (string, error) {
 		return "", fmt.Errorf("Failed to get interfaces! Err: %v", err)
 	}
 
+	//nolint:prealloc
 	var addrs []net.Addr
+	var loAddrs []net.Addr
 	for _, iface := range ifaces {
 		ifaceAddrs, err := iface.Addrs()
 		if err != nil {
 			// ignore error, interface can dissapear from system
 			continue
 		}
+		if iface.Flags&net.FlagLoopback != 0 {
+			loAddrs = append(loAddrs, ifaceAddrs...)
+			continue
+		}
 		addrs = append(addrs, ifaceAddrs...)
 	}
+	addrs = append(addrs, loAddrs...)
 
 	var ipAddr []byte
 	var publicIP []byte
@@ -113,10 +120,13 @@ func IPs() []string {
 				continue
 			}
 
-			ip = ip.To4()
-			if ip == nil {
-				continue
-			}
+			// dont skip ipv6 addrs
+			/*
+				ip = ip.To4()
+				if ip == nil {
+					continue
+				}
+			*/
 
 			ipAddrs = append(ipAddrs, ip.String())
 		}

@@ -2,7 +2,6 @@
 package grpc
 
 import (
-	"bytes"
 	"context"
 	"crypto/tls"
 	"fmt"
@@ -14,6 +13,7 @@ import (
 	"github.com/micro/go-micro/client"
 	"github.com/micro/go-micro/client/selector"
 	"github.com/micro/go-micro/codec"
+	raw "github.com/micro/go-micro/codec/bytes"
 	"github.com/micro/go-micro/errors"
 	"github.com/micro/go-micro/metadata"
 	"github.com/micro/go-micro/registry"
@@ -73,10 +73,11 @@ func (g *grpcClient) next(request client.Request, opts client.CallOptions) (sele
 
 	// get next nodes from the selector
 	next, err := g.opts.Selector.Select(service, opts.SelectOptions...)
-	if err != nil && err == selector.ErrNotFound {
-		return nil, errors.NotFound("go.micro.client", err.Error())
-	} else if err != nil {
-		return nil, errors.InternalServerError("go.micro.client", err.Error())
+	if err != nil {
+		if err == selector.ErrNotFound {
+			return nil, errors.InternalServerError("go.micro.client", "service %s: %s", service, err.Error())
+		}
+		return nil, errors.InternalServerError("go.micro.client", "error selecting %s node: %s", service, err.Error())
 	}
 
 	return next, nil
@@ -110,12 +111,21 @@ func (g *grpcClient) call(ctx context.Context, node *registry.Node, req client.R
 
 	var grr error
 
-	cc, err := g.pool.getConn(address, grpc.WithDefaultCallOptions(grpc.ForceCodec(cf)),
-		grpc.WithTimeout(opts.DialTimeout), g.secure(),
+	grpcDialOptions := []grpc.DialOption{
+		grpc.WithDefaultCallOptions(grpc.ForceCodec(cf)),
+		grpc.WithTimeout(opts.DialTimeout),
+		g.secure(),
 		grpc.WithDefaultCallOptions(
 			grpc.MaxCallRecvMsgSize(maxRecvMsgSize),
 			grpc.MaxCallSendMsgSize(maxSendMsgSize),
-		))
+		),
+	}
+
+	if opts := g.getGrpcDialOptions(); opts != nil {
+		grpcDialOptions = append(grpcDialOptions, opts...)
+	}
+
+	cc, err := g.pool.getConn(address, grpcDialOptions...)
 	if err != nil {
 		return errors.InternalServerError("go.micro.client", fmt.Sprintf("Error sending request: %v", err))
 	}
@@ -127,7 +137,11 @@ func (g *grpcClient) call(ctx context.Context, node *registry.Node, req client.R
 	ch := make(chan error, 1)
 
 	go func() {
-		err := cc.Invoke(ctx, methodToGRPC(req.Service(), req.Endpoint()), req.Body(), rsp, grpc.ForceCodec(cf))
+		grpcCallOptions := []grpc.CallOption{grpc.CallContentSubtype(cf.Name())}
+		if opts := g.getGrpcCallOptions(); opts != nil {
+			grpcCallOptions = append(grpcCallOptions, opts...)
+		}
+		err := cc.Invoke(ctx, methodToGRPC(req.Service(), req.Endpoint()), req.Body(), rsp, grpcCallOptions...)
 		ch <- microError(err)
 	}()
 
@@ -175,7 +189,16 @@ func (g *grpcClient) stream(ctx context.Context, node *registry.Node, req client
 
 	wc := wrapCodec{cf}
 
-	cc, err := grpc.DialContext(dialCtx, address, grpc.WithDefaultCallOptions(grpc.ForceCodec(wc)), g.secure())
+	grpcDialOptions := []grpc.DialOption{
+		grpc.WithDefaultCallOptions(grpc.ForceCodec(wc)),
+		g.secure(),
+	}
+
+	if opts := g.getGrpcDialOptions(); opts != nil {
+		grpcDialOptions = append(grpcDialOptions, opts...)
+	}
+
+	cc, err := grpc.DialContext(dialCtx, address, grpcDialOptions...)
 	if err != nil {
 		return nil, errors.InternalServerError("go.micro.client", fmt.Sprintf("Error sending request: %v", err))
 	}
@@ -186,7 +209,11 @@ func (g *grpcClient) stream(ctx context.Context, node *registry.Node, req client
 		ServerStreams: true,
 	}
 
-	st, err := cc.NewStream(ctx, desc, methodToGRPC(req.Service(), req.Endpoint()))
+	grpcCallOptions := []grpc.CallOption{}
+	if opts := g.getGrpcCallOptions(); opts != nil {
+		grpcCallOptions = append(grpcCallOptions, opts...)
+	}
+	st, err := cc.NewStream(ctx, desc, methodToGRPC(req.Service(), req.Endpoint()), grpcCallOptions...)
 	if err != nil {
 		return nil, errors.InternalServerError("go.micro.client", fmt.Sprintf("Error creating stream: %v", err))
 	}
@@ -255,16 +282,6 @@ func (g *grpcClient) newGRPCCodec(contentType string) (encoding.Codec, error) {
 	return nil, fmt.Errorf("Unsupported Content-Type: %s", contentType)
 }
 
-func (g *grpcClient) newCodec(contentType string) (codec.NewCodec, error) {
-	if c, ok := g.opts.Codecs[contentType]; ok {
-		return c, nil
-	}
-	if cf, ok := defaultRPCCodecs[contentType]; ok {
-		return cf, nil
-	}
-	return nil, fmt.Errorf("Unsupported Content-Type: %s", contentType)
-}
-
 func (g *grpcClient) Init(opts ...client.Option) error {
 	size := g.opts.PoolSize
 	ttl := g.opts.PoolTTL
@@ -312,7 +329,9 @@ func (g *grpcClient) Call(ctx context.Context, req client.Request, rsp interface
 	d, ok := ctx.Deadline()
 	if !ok {
 		// no deadline so we create a new one
-		ctx, _ = context.WithTimeout(ctx, callOpts.RequestTimeout)
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, callOpts.RequestTimeout)
+		defer cancel()
 	} else {
 		// got a deadline so no need to setup context
 		// but we need to set the timeout we pass along
@@ -350,15 +369,17 @@ func (g *grpcClient) Call(ctx context.Context, req client.Request, rsp interface
 
 		// select next node
 		node, err := next()
-		if err != nil && err == selector.ErrNotFound {
-			return errors.NotFound("go.micro.client", err.Error())
-		} else if err != nil {
-			return errors.InternalServerError("go.micro.client", err.Error())
+		service := req.Service()
+		if err != nil {
+			if err == selector.ErrNotFound {
+				return errors.InternalServerError("go.micro.client", "service %s: %s", service, err.Error())
+			}
+			return errors.InternalServerError("go.micro.client", "error selecting %s node: %s", service, err.Error())
 		}
 
 		// make the call
 		err = gcall(ctx, node, req, rsp, callOpts)
-		g.opts.Selector.Mark(req.Service(), node, err)
+		g.opts.Selector.Mark(service, node, err)
 		return err
 	}
 
@@ -429,14 +450,16 @@ func (g *grpcClient) Stream(ctx context.Context, req client.Request, opts ...cli
 		}
 
 		node, err := next()
-		if err != nil && err == selector.ErrNotFound {
-			return nil, errors.NotFound("go.micro.client", err.Error())
-		} else if err != nil {
-			return nil, errors.InternalServerError("go.micro.client", err.Error())
+		service := req.Service()
+		if err != nil {
+			if err == selector.ErrNotFound {
+				return nil, errors.InternalServerError("go.micro.client", "service %s: %s", service, err.Error())
+			}
+			return nil, errors.InternalServerError("go.micro.client", "error selecting %s node: %s", service, err.Error())
 		}
 
 		stream, err := g.stream(ctx, node, req, callOpts)
-		g.opts.Selector.Mark(req.Service(), node, err)
+		g.opts.Selector.Mark(service, node, err)
 		return stream, err
 	}
 
@@ -480,34 +503,101 @@ func (g *grpcClient) Stream(ctx context.Context, req client.Request, opts ...cli
 }
 
 func (g *grpcClient) Publish(ctx context.Context, p client.Message, opts ...client.PublishOption) error {
+	var options client.PublishOptions
+	for _, o := range opts {
+		o(&options)
+	}
+
 	md, ok := metadata.FromContext(ctx)
 	if !ok {
 		md = make(map[string]string)
 	}
 	md["Content-Type"] = p.ContentType()
+	md["Micro-Topic"] = p.Topic()
 
-	cf, err := g.newCodec(p.ContentType())
+	cf, err := g.newGRPCCodec(p.ContentType())
 	if err != nil {
 		return errors.InternalServerError("go.micro.client", err.Error())
 	}
 
-	b := &buffer{bytes.NewBuffer(nil)}
-	if err := cf(b).Write(&codec.Message{Type: codec.Event}, p.Payload()); err != nil {
-		return errors.InternalServerError("go.micro.client", err.Error())
+	var body []byte
+
+	// passed in raw data
+	if d, ok := p.Payload().(*raw.Frame); ok {
+		body = d.Data
+	} else {
+		// set the body
+		b, err := cf.Marshal(p.Payload())
+		if err != nil {
+			return errors.InternalServerError("go.micro.client", err.Error())
+		}
+		body = b
 	}
 
 	g.once.Do(func() {
 		g.opts.Broker.Connect()
 	})
 
-	return g.opts.Broker.Publish(p.Topic(), &broker.Message{
+	topic := p.Topic()
+
+	// get proxy topic
+	if prx := os.Getenv("MICRO_PROXY"); len(prx) > 0 {
+		options.Exchange = prx
+	}
+
+	// get the exchange
+	if len(options.Exchange) > 0 {
+		topic = options.Exchange
+	}
+
+	return g.opts.Broker.Publish(topic, &broker.Message{
 		Header: md,
-		Body:   b.Bytes(),
+		Body:   body,
 	})
 }
 
 func (g *grpcClient) String() string {
 	return "grpc"
+}
+
+func (g *grpcClient) getGrpcDialOptions() []grpc.DialOption {
+	if g.opts.CallOptions.Context == nil {
+		return nil
+	}
+
+	v := g.opts.CallOptions.Context.Value(grpcDialOptions{})
+
+	if v == nil {
+		return nil
+	}
+
+	opts, ok := v.([]grpc.DialOption)
+
+	if !ok {
+		return nil
+	}
+
+	return opts
+}
+
+func (g *grpcClient) getGrpcCallOptions() []grpc.CallOption {
+	if g.opts.CallOptions.Context == nil {
+		return nil
+	}
+
+	v := g.opts.CallOptions.Context.Value(grpcCallOptions{})
+
+	if v == nil {
+		return nil
+	}
+
+	opts, ok := v.([]grpc.CallOption)
+
+	if !ok {
+		return nil
+	}
+
+	return opts
 }
 
 func newClient(opts ...client.Option) client.Client {

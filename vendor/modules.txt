@@ -67,10 +67,11 @@ github.com/lecex/user/proto/casbin
 github.com/lecex/user/proto/permission
 # github.com/micro/cli/v2 v2.1.2-0.20200203150404-894195727d9c
 github.com/micro/cli/v2
-# github.com/micro/go-micro v1.7.1-0.20190711204633-5157241c88e0
+# github.com/micro/go-micro v1.18.0
 github.com/micro/go-micro/broker
 github.com/micro/go-micro/client
 github.com/micro/go-micro/client/grpc
+github.com/micro/go-micro/client/pool
 github.com/micro/go-micro/client/selector
 github.com/micro/go-micro/codec
 github.com/micro/go-micro/codec/bytes
@@ -85,6 +86,7 @@ github.com/micro/go-micro/registry
 github.com/micro/go-micro/registry/cache
 github.com/micro/go-micro/transport
 github.com/micro/go-micro/util/addr
+github.com/micro/go-micro/util/buf
 github.com/micro/go-micro/util/log
 github.com/micro/go-micro/util/net
 github.com/micro/go-micro/util/tls

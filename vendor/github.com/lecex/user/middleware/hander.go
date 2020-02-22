@@ -6,6 +6,7 @@ import (
 
 	"github.com/micro/go-micro/v2/metadata"
 	"github.com/micro/go-micro/v2/server"
+	"github.com/micro/go-micro/v2/util/log"
 
 	client "github.com/lecex/core/client"
 
@@ -32,6 +33,7 @@ func (srv *Handler) Wrapper(fn server.HandlerFunc) server.HandlerFunc {
 			if !ok {
 				return errors.New("no auth meta-data found in request")
 			}
+			log.Log(meta)
 			if token, ok := meta["x-token"]; ok {
 				// Note this is now uppercase (not entirely sure why this is...)
 				// token := strings.Split(meta["authorization"], "Bearer ")[1]

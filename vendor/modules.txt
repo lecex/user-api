@@ -57,7 +57,7 @@ github.com/json-iterator/go
 github.com/lecex/core/client
 github.com/lecex/core/config
 github.com/lecex/core/env
-# github.com/lecex/user v1.0.4
+# github.com/lecex/user v1.0.8
 github.com/lecex/user/middleware
 github.com/lecex/user/proto/auth
 github.com/lecex/user/proto/casbin

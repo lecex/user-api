@@ -24,7 +24,6 @@ func main() {
 		Server: service.Server(),
 	}
 	h.Register()
-
 	// Run the server
 	if err := service.Run(); err != nil {
 		log.Fatal(err)

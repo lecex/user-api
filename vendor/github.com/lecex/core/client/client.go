@@ -3,8 +3,8 @@ package client
 import (
 	"context"
 
-	cli "github.com/micro/go-micro/client/grpc"
 	"github.com/micro/go-micro/v2/client"
+	cli "github.com/micro/go-micro/v2/client/grpc"
 	"github.com/micro/go-micro/v2/config/cmd"
 )
 

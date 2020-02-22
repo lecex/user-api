@@ -24,9 +24,6 @@ github.com/coreos/pkg/capnslog
 github.com/cpuguy83/go-md2man/v2/md2man
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 github.com/dgrijalva/jwt-go
-# github.com/go-log/log v0.1.0
-github.com/go-log/log
-github.com/go-log/log/log
 # github.com/go-redis/redis v6.15.7+incompatible
 github.com/go-redis/redis
 github.com/go-redis/redis/internal
@@ -56,7 +53,7 @@ github.com/jinzhu/gorm
 github.com/jinzhu/inflection
 # github.com/json-iterator/go v1.1.9
 github.com/json-iterator/go
-# github.com/lecex/core v1.0.4
+# github.com/lecex/core v1.0.5
 github.com/lecex/core/client
 github.com/lecex/core/config
 github.com/lecex/core/env
@@ -67,29 +64,6 @@ github.com/lecex/user/proto/casbin
 github.com/lecex/user/proto/permission
 # github.com/micro/cli/v2 v2.1.2-0.20200203150404-894195727d9c
 github.com/micro/cli/v2
-# github.com/micro/go-micro v1.18.0
-github.com/micro/go-micro/broker
-github.com/micro/go-micro/client
-github.com/micro/go-micro/client/grpc
-github.com/micro/go-micro/client/pool
-github.com/micro/go-micro/client/selector
-github.com/micro/go-micro/codec
-github.com/micro/go-micro/codec/bytes
-github.com/micro/go-micro/codec/grpc
-github.com/micro/go-micro/codec/json
-github.com/micro/go-micro/codec/jsonrpc
-github.com/micro/go-micro/codec/proto
-github.com/micro/go-micro/codec/protorpc
-github.com/micro/go-micro/errors
-github.com/micro/go-micro/metadata
-github.com/micro/go-micro/registry
-github.com/micro/go-micro/registry/cache
-github.com/micro/go-micro/transport
-github.com/micro/go-micro/util/addr
-github.com/micro/go-micro/util/buf
-github.com/micro/go-micro/util/log
-github.com/micro/go-micro/util/net
-github.com/micro/go-micro/util/tls
 # github.com/micro/go-micro/v2 v2.1.0
 github.com/micro/go-micro/v2
 github.com/micro/go-micro/v2/auth

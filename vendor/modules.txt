@@ -53,7 +53,7 @@ github.com/jinzhu/gorm
 github.com/jinzhu/inflection
 # github.com/json-iterator/go v1.1.9
 github.com/json-iterator/go
-# github.com/lecex/core v1.0.5
+# github.com/lecex/core v1.0.6
 github.com/lecex/core/client
 github.com/lecex/core/config
 github.com/lecex/core/env

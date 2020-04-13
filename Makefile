@@ -8,7 +8,7 @@ tag:
 	git push --tags
 .PHONY: micro
 micro:
-	micro api --enable_rpc=true
+	micro api --handler=api
 
 .PHONY: proto
 proto:

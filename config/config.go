@@ -7,16 +7,18 @@ import (
 )
 
 // 	Conf 配置
-// 	Service // 服务名称
+// 	Name // 服务名称
 //	Method // 方法
 //	Auth // 是否认证授权
 //	Policy // 是否认证权限
 //	Name // 权限名称
 //	Description // 权限解释
 var Conf config.Config = config.Config{
-	Service:     env.Getenv("MICRO_API_NAMESPACE", "go.micro.api") + "user-api",
-	Version:     "latest",
-	UserService: env.Getenv("USER_NAME", "user"),
+	Name:    env.Getenv("MICRO_API_NAMESPACE", "go.micro.api.") + "user-api",
+	Version: "latest",
+	Service: map[string]string{
+		"User": env.Getenv("USER_NAME", "go.micro.srv.user"),
+	},
 	Permissions: []*PB.Permission{
 		// 授权管理
 		{Service: "user-api", Method: "Auth.Auth", Auth: false, Policy: false, Name: "用户授权", Description: "用户登录授权返回 token 权限。"},

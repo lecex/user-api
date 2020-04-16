@@ -68,7 +68,5 @@ func (srv *FrontPermit) Update(ctx context.Context, req *pb.Request, res *pb.Res
 
 // Delete 删除权限
 func (srv *FrontPermit) Delete(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
-	return client.Call(ctx, srv.ServiceName, "FrontPermits.Delete", &pb.FrontPermit{
-		Id: req.FrontPermit.Id,
-	}, res)
+	return client.Call(ctx, srv.ServiceName, "FrontPermits.Delete", req, res)
 }

@@ -40,7 +40,5 @@ func (srv *Role) Update(ctx context.Context, req *pb.Request, res *pb.Response) 
 
 // Delete 删除角色
 func (srv *Role) Delete(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
-	return client.Call(ctx, srv.ServiceName, "Roles.Delete", &pb.Role{
-		Id: req.Role.Id,
-	}, res)
+	return client.Call(ctx, srv.ServiceName, "Roles.Delete", req, res)
 }

@@ -40,7 +40,5 @@ func (srv *Permission) Update(ctx context.Context, req *pb.Request, res *pb.Resp
 
 // Delete 删除权限
 func (srv *Permission) Delete(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
-	return client.Call(ctx, srv.ServiceName, "Permissions.Delete", &pb.Permission{
-		Id: req.Permission.Id,
-	}, res)
+	return client.Call(ctx, srv.ServiceName, "Permissions.Delete", req, res)
 }

@@ -158,7 +158,5 @@ func (srv *User) Update(ctx context.Context, req *pb.Request, res *pb.Response) 
 
 // Delete 删除用户
 func (srv *User) Delete(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
-	return client.Call(ctx, srv.ServiceName, "Users.Delete", &pb.User{
-		Id: req.User.Id,
-	}, res)
+	return client.Call(ctx, srv.ServiceName, "Users.Delete", req, res)
 }

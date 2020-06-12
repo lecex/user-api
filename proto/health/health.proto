@@ -12,4 +12,6 @@ message Request {
 
 message Response {
     bool valid = 1;
+    string time = 2;
+    
 }

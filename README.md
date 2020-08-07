@@ -46,7 +46,7 @@
     - Get               查询权限
     - Create            增加权限
     - Update            更新权限
-    - Delete            删除权限··
+    - Delete            删除权限
 ## Roles 角色管理
     - All               全部角色
     - List              角色列表

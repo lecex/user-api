@@ -3,7 +3,7 @@ FROM bigrocs/golang-gcc:1.13 as builder
 WORKDIR /go/src/github.com/lecex/user-api
 COPY . .
 
-ENV GO111MODULE=off CGO_ENABLED=1 GOOS=linux GOARCH=amd64
+ENV GO111MODULE=on CGO_ENABLED=1 GOOS=linux GOARCH=amd64
 RUN go build -a -installsuffix cgo -o bin/userApi
 
 FROM bigrocs/alpine:ca-data

@@ -117,7 +117,7 @@ func (g *grpcClient) next(request client.Request, opts client.CallOptions) (sele
 
 func (g *grpcClient) call(ctx context.Context, node *registry.Node, req client.Request, rsp interface{}, opts client.CallOptions) error {
 	var header map[string]string
-
+	fmt.Println(7, node)
 	address := node.Address
 
 	header = make(map[string]string)
@@ -154,7 +154,7 @@ func (g *grpcClient) call(ctx context.Context, node *registry.Node, req client.R
 	maxSendMsgSize := g.maxSendMsgSizeValue()
 
 	var grr error
-
+	fmt.Println(8, address)
 	grpcDialOptions := []grpc.DialOption{
 		grpc.WithDefaultCallOptions(grpc.ForceCodec(cf)),
 		grpc.WithTimeout(opts.DialTimeout),

@@ -28,4 +28,4 @@ docker:
 	docker build -f Dockerfile  -t user-api .
 .PHONY: run
 run:
-	go run main.go --registry=nats
+	go run main.go

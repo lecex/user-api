@@ -78,7 +78,7 @@ func (g *grpcClient) secure(addr string) grpc.DialOption {
 
 func (g *grpcClient) next(request client.Request, opts client.CallOptions) (selector.Next, error) {
 	service := request.Service()
-
+	fmt.Println("1.1", service)
 	// get proxy
 	if prx := os.Getenv("MICRO_PROXY"); len(prx) > 0 {
 		// default name
@@ -87,12 +87,12 @@ func (g *grpcClient) next(request client.Request, opts client.CallOptions) (sele
 		}
 		service = prx
 	}
-
+	fmt.Println("1.2", service)
 	// get proxy address
 	if prx := os.Getenv("MICRO_PROXY_ADDRESS"); len(prx) > 0 {
 		opts.Address = []string{prx}
 	}
-
+	fmt.Println("1.3", opts)
 	// return remote address
 	if len(opts.Address) > 0 {
 		return func() (*registry.Node, error) {
@@ -101,9 +101,10 @@ func (g *grpcClient) next(request client.Request, opts client.CallOptions) (sele
 			}, nil
 		}, nil
 	}
-
+	fmt.Println("1.4", service, opts.SelectOptions)
 	// get next nodes from the selector
 	next, err := g.opts.Selector.Select(service, opts.SelectOptions...)
+	fmt.Println("1.5", next, err)
 	if err != nil {
 		if err == selector.ErrNotFound {
 			return nil, errors.InternalServerError("go.micro.client", "service %s: %s", service, err.Error())
@@ -395,6 +396,7 @@ func (g *grpcClient) NewRequest(service, method string, req interface{}, reqOpts
 }
 
 func (g *grpcClient) Call(ctx context.Context, req client.Request, rsp interface{}, opts ...client.CallOption) error {
+	fmt.Println("0")
 	if req == nil {
 		return errors.InternalServerError("go.micro.client", "req is nil")
 	} else if rsp == nil {
@@ -405,12 +407,12 @@ func (g *grpcClient) Call(ctx context.Context, req client.Request, rsp interface
 	for _, opt := range opts {
 		opt(&callOpts)
 	}
-
+	fmt.Println("1")
 	next, err := g.next(req, callOpts)
 	if err != nil {
 		return err
 	}
-
+	fmt.Println("2")
 	// check if we already have a deadline
 	d, ok := ctx.Deadline()
 	if !ok {
@@ -424,7 +426,7 @@ func (g *grpcClient) Call(ctx context.Context, req client.Request, rsp interface
 		opt := client.WithRequestTimeout(time.Until(d))
 		opt(&callOpts)
 	}
-
+	fmt.Println("3")
 	// should we noop right here?
 	select {
 	case <-ctx.Done():
@@ -434,12 +436,12 @@ func (g *grpcClient) Call(ctx context.Context, req client.Request, rsp interface
 
 	// make copy of call method
 	gcall := g.call
-
+	fmt.Println("4")
 	// wrap the call in reverse
 	for i := len(callOpts.CallWrappers); i > 0; i-- {
 		gcall = callOpts.CallWrappers[i-1](gcall)
 	}
-
+	fmt.Println("5")
 	// return errors.New("go.micro.client", "request timeout", 408)
 	call := func(i int) error {
 		// call backoff first. Someone may want an initial start delay
@@ -473,7 +475,7 @@ func (g *grpcClient) Call(ctx context.Context, req client.Request, rsp interface
 
 		return err
 	}
-
+	fmt.Println("6")
 	ch := make(chan error, callOpts.Retries+1)
 	var gerr error
 

@@ -118,7 +118,7 @@ var (
 
 // Makes a synchronous call to a service using the default client
 func Call(ctx context.Context, request Request, response interface{}, opts ...CallOption) error {
-	fmt.Println("call", DefaultClient)
+	fmt.Println("call", DefaultClient, "33")
 	return DefaultClient.Call(ctx, request, response, opts...)
 }
 

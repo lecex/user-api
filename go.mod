@@ -6,8 +6,7 @@ require (
 	github.com/go-redis/redis v6.15.7+incompatible
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.4.0
-	github.com/lecex/core v1.0.11
-	github.com/lecex/user v1.2.5
+	github.com/lecex/core v1.0.15
+	github.com/lecex/user v1.2.6
 	github.com/micro/go-micro/v2 v2.3.0
-	github.com/micro/go-plugins/registry/nats/v2 v2.3.0
 )

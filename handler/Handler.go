@@ -21,22 +21,17 @@ import (
 	PB "github.com/lecex/user/proto/permission"
 )
 
-// Handler 注册方法
-type Handler struct {
-	Server server.Server
-}
-
 var Conf = config.Conf
 
 // Register 注册
-func (srv *Handler) Register() {
-	userPB.RegisterUsersHandler(srv.Server, &User{Conf.Service["user"]})
-	authPB.RegisterAuthHandler(srv.Server, &Auth{Conf.Service["user"]})
-	frontPermitPB.RegisterFrontPermitsHandler(srv.Server, &FrontPermit{Conf.Service["user"]})
-	permissionPB.RegisterPermissionsHandler(srv.Server, &Permission{Conf.Service["user"]})
-	rolePB.RegisterRolesHandler(srv.Server, &Role{Conf.Service["user"]})
-	casbinPB.RegisterCasbinHandler(srv.Server, &Casbin{Conf.Service["user"]}) // 权限管理服务实现
-	healthPB.RegisterHealthHandler(srv.Server, &Health{})
+func Register(Server server.Server) {
+	userPB.RegisterUsersHandler(Server, &User{Conf.Service["user"]})
+	authPB.RegisterAuthHandler(Server, &Auth{Conf.Service["user"]})
+	frontPermitPB.RegisterFrontPermitsHandler(Server, &FrontPermit{Conf.Service["user"]})
+	permissionPB.RegisterPermissionsHandler(Server, &Permission{Conf.Service["user"]})
+	rolePB.RegisterRolesHandler(Server, &Role{Conf.Service["user"]})
+	casbinPB.RegisterCasbinHandler(Server, &Casbin{Conf.Service["user"]}) // 权限管理服务实现
+	healthPB.RegisterHealthHandler(Server, &Health{})
 
 	go Sync() // 同步前端权限
 }

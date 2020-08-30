@@ -5,7 +5,7 @@ import (
 	"github.com/micro/go-micro/v2"
 	"github.com/micro/go-micro/v2/util/log"
 
-	_ "github.com/lecex/core/plugins" // 插件在后面执行防止被micro覆盖
+	_ "github.com/lecex/core/plugins"
 	"github.com/lecex/user-api/config"
 	"github.com/lecex/user-api/handler"
 )

@@ -2,10 +2,10 @@ package main
 
 import (
 	// 公共引入
-	_ "github.com/lecex/core/plugins"
 	"github.com/micro/go-micro/v2"
 	"github.com/micro/go-micro/v2/util/log"
 
+	_ "github.com/lecex/core/plugins" // 插件在后面执行
 	"github.com/lecex/user-api/config"
 	"github.com/lecex/user-api/handler"
 )

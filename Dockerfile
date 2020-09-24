@@ -12,3 +12,4 @@ RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 COPY --from=builder /go/src/github.com/lecex/user-api/bin/userApi /usr/local/bin/
 CMD ["userApi"]
+EXPOSE 8080

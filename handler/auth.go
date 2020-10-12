@@ -15,7 +15,7 @@ type Auth struct {
 
 // Auth 授权认证
 // 返回token
-func (srv *Auth) Auth(ctx context.Context, req *pb.Request, res *pb.Request) (err error) {
+func (srv *Auth) Auth(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
 	err = client.Call(ctx, srv.ServiceName, "Auth.Auth", req, res)
 	return err
 }
@@ -27,12 +27,12 @@ func (srv *Auth) Auth(ctx context.Context, req *pb.Request, res *pb.Request) (er
 // 通过存储多种类型的 token 来实现多端登录
 // token id type type=登录类型
 // 过期时间默认还是在 jwt token 中存储
-func (srv *Auth) Logout(ctx context.Context, req *pb.Request, res *pb.Request) (err error) {
+func (srv *Auth) Logout(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
 	return err
 }
 
 // ValidateToken 验证 token
 // 并且验证 token 所属用户相关权限
-func (srv *Auth) ValidateToken(ctx context.Context, req *pb.Request, res *pb.Request) (err error) {
+func (srv *Auth) ValidateToken(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
 	return client.Call(ctx, srv.ServiceName, "Auth.ValidateToken", req, res)
 }

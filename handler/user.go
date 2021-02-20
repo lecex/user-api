@@ -143,7 +143,7 @@ func (srv *User) Get(ctx context.Context, req *pb.Request, res *pb.Response) (er
 // Create 创建用户
 func (srv *User) Create(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
 	meta, _ := metadata.FromContext(ctx)
-	req.User.Origin = meta["service"]
+	req.User.Origin = meta["Service"]
 	err = client.Call(ctx, srv.ServiceName, "Users.Create", req, res)
 	if res.User != nil {
 		res.User.Password = ""

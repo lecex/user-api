@@ -2,8 +2,10 @@ package handler
 
 import (
 	"context"
+	"fmt"
 
 	client "github.com/lecex/core/client"
+	"github.com/micro/go-micro/v2/metadata"
 
 	pb "github.com/lecex/user-api/proto/auth"
 )
@@ -16,6 +18,8 @@ type Auth struct {
 // Auth 授权认证
 // 返回token
 func (srv *Auth) Auth(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
+	meta, ok := metadata.FromContext(ctx)
+	fmt.Println(meta, ok)
 	err = client.Call(ctx, srv.ServiceName, "Auth.Auth", req, res)
 	return err
 }

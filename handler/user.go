@@ -26,6 +26,7 @@ func (srv *User) Exist(ctx context.Context, req *pb.Request, res *pb.Response) (
 
 // MobileBuild 绑定手机
 func (srv *User) MobileBuild(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
+	// debug 绑定手机现在不可以用
 	// 通过 uuid 获取存储的验证码进行验证 req.Uuid req.Verify
 	redis := redis.NewClient()
 	verify, err := redis.Get(req.Uuid).Result()
@@ -62,8 +63,13 @@ func (srv *User) SelfUpdate(ctx context.Context, req *pb.Request, res *pb.Respon
 	// meta["Userid"] 通过 meta 获取用户 id --- So this function needs token to use
 	meta, _ := metadata.FromContext(ctx)
 	if userID, ok := meta["Userid"]; ok {
-		req.User.Id = userID
-		err = client.Call(ctx, srv.ServiceName, "Users.Update", req, res)
+		r := &pb.User{
+			Id:       userID,
+			Name:     req.User.Name,
+			Avatar:   req.User.Avatar,
+			Username: req.User.Username,
+		}
+		err = client.Call(ctx, srv.ServiceName, "Users.Update", r, res)
 		if err != nil {
 			err = errors.New("更新用户信息失败")
 			return err

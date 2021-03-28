@@ -63,11 +63,13 @@ func (srv *User) SelfUpdate(ctx context.Context, req *pb.Request, res *pb.Respon
 	// meta["Userid"] 通过 meta 获取用户 id --- So this function needs token to use
 	meta, _ := metadata.FromContext(ctx)
 	if userID, ok := meta["Userid"]; ok {
-		r := &pb.User{
-			Id:       userID,
-			Name:     req.User.Name,
-			Avatar:   req.User.Avatar,
-			Username: req.User.Username,
+		r :=&pb.Request{
+			user : &pb.User{
+				Id:       userID,
+				Name:     req.User.Name,
+				Avatar:   req.User.Avatar,
+				Username: req.User.Username,
+			}
 		}
 		err = client.Call(ctx, srv.ServiceName, "Users.Update", r, res)
 		if err != nil {

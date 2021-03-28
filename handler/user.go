@@ -71,6 +71,7 @@ func (srv *User) SelfUpdate(ctx context.Context, req *pb.Request, res *pb.Respon
 		}
 		err = client.Call(ctx, srv.ServiceName, "Users.Update", r, res)
 		if err != nil {
+			log.Log(err)
 			return err
 		}
 	} else {

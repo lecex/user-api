@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/micro/go-micro/v2/metadata"
@@ -55,6 +54,6 @@ func TestUserInfo(t *testing.T) {
 	}
 	ctx := metadata.NewContext(context.TODO(), meta)
 	err := h.Info(ctx, req, res)
-	fmt.Println(req, res, err)
+	// fmt.Println(req, res, err)
 	t.Log(req, res, err)
 }

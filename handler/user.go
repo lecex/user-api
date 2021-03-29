@@ -64,12 +64,12 @@ func (srv *User) SelfUpdate(ctx context.Context, req *pb.Request, res *pb.Respon
 	meta, _ := metadata.FromContext(ctx)
 	if userID, ok := meta["Userid"]; ok {
 		r :=&pb.Request{
-			user : &pb.User{
+			User : &pb.User{
 				Id:       userID,
 				Name:     req.User.Name,
 				Avatar:   req.User.Avatar,
 				Username: req.User.Username,
-			}
+			},
 		}
 		err = client.Call(ctx, srv.ServiceName, "Users.Update", r, res)
 		if err != nil {

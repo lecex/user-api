@@ -6,7 +6,6 @@ import (
 	"time"
 
 	client "github.com/lecex/core/client"
-	"github.com/micro/go-micro/v2/util/log"
 
 	pb "github.com/lecex/user-api/proto/auth"
 	authSrvPB "github.com/lecex/user/proto/auth"
@@ -30,24 +29,19 @@ func (srv *Auth) Auth(ctx context.Context, req *pb.Request, res *pb.Response) (e
 // Mobile 手机验证码授权
 func (srv *Auth) Mobile(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
 	if req.User.Mobile != "" { // 验证手机
-		err = srv.VerifyCaptcha(req.User.Mobile, req.Captcha)
-		if err != nil {
-			return err
-		}
+		// err = srv.VerifyCaptcha(req.User.Mobile, req.Captcha)
+		// if err != nil {
+		// 	return err
+		// }
 		reqAuthSrv := &authSrvPB.Request{
 			User: &authSrvPB.User{
 				Mobile: req.User.Mobile,
 			},
 		}
-		log.Log(req)
-		log.Log(reqAuthSrv)
-		resAuthSrv := &authSrvPB.Response{}
-		err = client.Call(ctx, srv.ServiceName, "Auth.AuthById", reqAuthSrv, resAuthSrv)
+		err = client.Call(ctx, srv.ServiceName, "Auth.AuthById", reqAuthSrv, res)
 		if err != nil {
 			return err
 		}
-		log.Log(resAuthSrv)
-		res.Token = resAuthSrv.Token
 	}
 	return err
 }

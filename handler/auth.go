@@ -6,6 +6,7 @@ import (
 	"time"
 
 	client "github.com/lecex/core/client"
+	"github.com/micro/go-micro/v2/util/log"
 
 	pb "github.com/lecex/user-api/proto/auth"
 	authSrvPB "github.com/lecex/user/proto/auth"
@@ -39,11 +40,14 @@ func (srv *Auth) Mobile(ctx context.Context, req *pb.Request, res *pb.Response) 
 			Mobile: req.User.Mobile,
 		},
 	}
+	log.Log(req)
+	log.Log(reqAuthSrv)
 	resAuthSrv := &authSrvPB.Response{}
 	err = client.Call(ctx, srv.ServiceName, "Auth.AuthById", reqAuthSrv, resAuthSrv)
 	if err != nil {
 		return err
 	}
+	log.Log(resAuthSrv)
 	res.Token = resAuthSrv.Token
 	return err
 }

@@ -39,10 +39,12 @@ func (srv *Auth) Mobile(ctx context.Context, req *pb.Request, res *pb.Response) 
 			Mobile: req.User.Mobile,
 		},
 	}
-	err = client.Call(ctx, srv.ServiceName, "Auth.AuthById", reqAuthSrv, res)
+	resAuthSrv := &authSrvPB.Response{}
+	err = client.Call(ctx, srv.ServiceName, "Auth.AuthById", reqAuthSrv, resAuthSrv)
 	if err != nil {
 		return err
 	}
+	res.Token = resAuthSrv.Token
 	return err
 }
 

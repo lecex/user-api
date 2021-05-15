@@ -5,6 +5,8 @@ package auth;
 service Auth {
     // 用户验证授权
     rpc Auth(Request) returns (Response) {}
+    // 手机授权登录
+    rpc Mobile(Request) returns (Response) {}
      // 用户退出登录
     rpc Logout(Request) returns (Response) {}
     
@@ -29,6 +31,7 @@ message Request{
     string token = 2;
     string service = 3;
     string method = 4;
+    string captcha = 5;                      // 验证码
 }
 
 message Response {

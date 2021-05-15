@@ -2,21 +2,48 @@ package handler
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	client "github.com/lecex/core/client"
 
 	pb "github.com/lecex/user-api/proto/auth"
+	authSrvPB "github.com/lecex/user/proto/auth"
+
+	"github.com/go-redis/redis"
 )
 
 // Auth 授权服务处理
 type Auth struct {
 	ServiceName string
+	Redis       *redis.Client
 }
 
 // Auth 授权认证
 // 返回token
 func (srv *Auth) Auth(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
 	err = client.Call(ctx, srv.ServiceName, "Auth.Auth", req, res)
+	return err
+}
+
+// Mobile 手机验证码授权
+func (srv *Auth) Mobile(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
+	if req.User.Mobile != "" { // 验证手机
+		err = srv.VerifyCaptcha(req.User.Mobile, req.Captcha)
+		if err != nil {
+			return err
+		}
+	}
+	reqAuthSrv := &authSrvPB.Request{
+		User: &authSrvPB.User{
+			Mobile: req.User.Mobile,
+		},
+	}
+	resAuthSrv := &authSrvPB.Response{}
+	err = client.Call(ctx, srv.ServiceName, "Auth.AuthById", reqAuthSrv, resAuthSrv)
+	if err != nil {
+		return err
+	}
 	return err
 }
 
@@ -35,4 +62,21 @@ func (srv *Auth) Logout(ctx context.Context, req *pb.Request, res *pb.Response) 
 // 并且验证 token 所属用户相关权限
 func (srv *Auth) ValidateToken(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
 	return client.Call(ctx, srv.ServiceName, "Auth.ValidateToken", req, res)
+}
+
+// VerifyCaptcha 校验验证码
+func (srv *Auth) VerifyCaptcha(addressee string, captcha string) (err error) {
+	r, err := srv.Redis.Get("Captcha_" + addressee).Result()
+	if err != nil {
+		if err.Error() == "redis: nil" {
+			return fmt.Errorf("验证码已超时")
+		}
+		return err
+	}
+	if r != captcha {
+		return fmt.Errorf("验证码错误")
+	}
+	srv.Redis.Set("Captcha_"+addressee, r, 1*time.Second).Err() // 1秒后自动过期
+	return nil
+
 }

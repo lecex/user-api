@@ -36,6 +36,8 @@ var _ server.Option
 type AuthService interface {
 	// 用户验证授权
 	Auth(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
+	// 手机授权登录
+	Mobile(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
 	// 用户退出登录
 	Logout(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
 	// token 验证
@@ -56,6 +58,16 @@ func NewAuthService(name string, c client.Client) AuthService {
 
 func (c *authService) Auth(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error) {
 	req := c.c.NewRequest(c.name, "Auth.Auth", in)
+	out := new(Response)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authService) Mobile(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error) {
+	req := c.c.NewRequest(c.name, "Auth.Mobile", in)
 	out := new(Response)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -89,6 +101,8 @@ func (c *authService) ValidateToken(ctx context.Context, in *Request, opts ...cl
 type AuthHandler interface {
 	// 用户验证授权
 	Auth(context.Context, *Request, *Response) error
+	// 手机授权登录
+	Mobile(context.Context, *Request, *Response) error
 	// 用户退出登录
 	Logout(context.Context, *Request, *Response) error
 	// token 验证
@@ -98,6 +112,7 @@ type AuthHandler interface {
 func RegisterAuthHandler(s server.Server, hdlr AuthHandler, opts ...server.HandlerOption) error {
 	type auth interface {
 		Auth(ctx context.Context, in *Request, out *Response) error
+		Mobile(ctx context.Context, in *Request, out *Response) error
 		Logout(ctx context.Context, in *Request, out *Response) error
 		ValidateToken(ctx context.Context, in *Request, out *Response) error
 	}
@@ -114,6 +129,10 @@ type authHandler struct {
 
 func (h *authHandler) Auth(ctx context.Context, in *Request, out *Response) error {
 	return h.AuthHandler.Auth(ctx, in, out)
+}
+
+func (h *authHandler) Mobile(ctx context.Context, in *Request, out *Response) error {
+	return h.AuthHandler.Mobile(ctx, in, out)
 }
 
 func (h *authHandler) Logout(ctx context.Context, in *Request, out *Response) error {

@@ -16,6 +16,7 @@ import (
 	permissionPB "github.com/lecex/user-api/proto/permission"
 	rolePB "github.com/lecex/user-api/proto/role"
 	userPB "github.com/lecex/user-api/proto/user"
+	"github.com/lecex/user-api/providers/redis"
 
 	"github.com/lecex/user-api/config"
 	PB "github.com/lecex/user/proto/permission"
@@ -25,8 +26,9 @@ var Conf = config.Conf
 
 // Register 注册
 func Register(Server server.Server) {
+	redis := redis.NewClient()
 	userPB.RegisterUsersHandler(Server, &User{Conf.Service["user"]})
-	authPB.RegisterAuthHandler(Server, &Auth{Conf.Service["user"]})
+	authPB.RegisterAuthHandler(Server, &Auth{Conf.Service["user"], redis})
 	frontPermitPB.RegisterFrontPermitsHandler(Server, &FrontPermit{Conf.Service["user"]})
 	permissionPB.RegisterPermissionsHandler(Server, &Permission{Conf.Service["user"]})
 	rolePB.RegisterRolesHandler(Server, &Role{Conf.Service["user"]})

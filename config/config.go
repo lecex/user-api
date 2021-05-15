@@ -22,6 +22,7 @@ var Conf config.Config = config.Config{
 	Permissions: []*PB.Permission{
 		// 授权管理
 		{Service: "user-api", Method: "Auth.Auth", Auth: false, Policy: false, Name: "用户授权", Description: "用户登录授权返回 token 权限。"},
+		{Service: "user-api", Method: "Auth.Mobile", Auth: false, Policy: false, Name: "手机授权", Description: "手机登录授权返回 token 权限。"},
 		{Service: "user-api", Method: "Auth.ValidateToken", Auth: false, Policy: false, Name: "权限认证", Description: "权限相关认证权限。"},
 		// 用户管理
 		{Service: "user-api", Method: "Users.Exist", Auth: false, Policy: false, Name: "检测用户", Description: "检测用户是否存在权限。"},

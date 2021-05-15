@@ -30,10 +30,10 @@ func (srv *Auth) Auth(ctx context.Context, req *pb.Request, res *pb.Response) (e
 // Mobile 手机验证码授权
 func (srv *Auth) Mobile(ctx context.Context, req *pb.Request, res *pb.Response) (err error) {
 	if req.User.Mobile != "" { // 验证手机
-		// err = srv.VerifyCaptcha(req.User.Mobile, req.Captcha)
-		// if err != nil {
-		// 	return err
-		// }
+		err = srv.VerifyCaptcha(req.User.Mobile, req.Captcha)
+		if err != nil {
+			return err
+		}
 		reqAuthSrv := &authSrvPB.Request{
 			User: &authSrvPB.User{
 				Mobile: req.User.Mobile,
